@@ -16,14 +16,12 @@
             margin: 0;
             overscroll-behavior: none;
         }
-
-        h2 { 
-            color: #482a83; 
-            margin-bottom: 10px; 
+        h2 {
+            color: #482a83;
+            margin-bottom: 10px;
             text-align: center;
             font-size: 1.5rem;
         }
-
         .editor-container {
             background: white;
             padding: 20px;
@@ -36,7 +34,6 @@
             flex-direction: column;
             align-items: center;
         }
-
         .canvas-wrapper {
             position: relative;
             margin: 20px 0;
@@ -44,8 +41,8 @@
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             cursor: grab;
-            width: 100%; 
-            max-width: 400px; 
+            width: 100%;
+            max-width: 400px;
             aspect-ratio: 1 / 1;
             height: auto;
             border: 4px solid #fff;
@@ -53,15 +50,12 @@
             touch-action: none;
         }
         .canvas-wrapper:active { cursor: grabbing; }
-
-        canvas { 
-            display: block; 
-            width: 100%; 
-            height: 100%; 
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
         }
-
         .controls { width: 100%; display: flex; flex-direction: column; gap: 15px; }
-
         .control-row {
             display: flex;
             justify-content: space-between;
@@ -70,23 +64,21 @@
             padding: 12px;
             border-radius: 8px;
         }
-        
-        label { 
-            font-weight: 700; 
-            font-size: 0.9em; 
+       
+        label {
+            font-weight: 700;
+            font-size: 0.9em;
             color: #51388E;
-            text-transform: uppercase; 
+            text-transform: uppercase;
             white-space: nowrap;
         }
-
-        input[type="range"] { 
-            flex-grow: 1; 
-            margin-left: 15px; 
-            cursor: pointer; 
+        input[type="range"] {
+            flex-grow: 1;
+            margin-left: 15px;
+            cursor: pointer;
             accent-color: #482a83;
             height: 25px;
         }
-
         .file-btn {
             display: block;
             width: 100%;
@@ -103,10 +95,9 @@
             position: relative;
             box-sizing: border-box;
         }
-        
+       
         .file-btn:active { background: #f0f0f0; }
         .file-btn input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-
         button#downloadBtn {
             background-color: #482a83;
             color: white;
@@ -126,9 +117,7 @@
     </style>
 </head>
 <body>
-
     <h2>Foto de Campaña</h2>
-
     <div class="editor-container">
         <div class="controls">
             <div class="file-btn">
@@ -136,11 +125,9 @@
                 <input type="file" id="uploadInput" accept="image/*">
             </div>
         </div>
-
         <div class="canvas-wrapper">
             <canvas id="mainCanvas" width="770" height="770"></canvas>
         </div>
-
         <div class="controls">
             <div class="control-row">
                 <label>Tamaño Foto</label>
@@ -149,54 +136,48 @@
             <button id="downloadBtn" disabled>DESCARGAR IMAGEN</button>
         </div>
     </div>
-
     <script>
         const canvas = document.getElementById('mainCanvas');
         const ctx = canvas.getContext('2d');
         const uploadInput = document.getElementById('uploadInput');
         const photoScaleSlider = document.getElementById('photoScale');
         const downloadBtn = document.getElementById('downloadBtn');
-
         // === CONFIGURACIÓN AJUSTADA ===
         const config = {
-            mainColor: "#482a83", 
-            accentColor: "#f7931e", 
+            mainColor: "#482a83",
+            accentColor: "#f7931e",
             textColor: "#FFFFFF",
             topText: "YO ME UNO",
             bottomTextPart1: "A LA",
             bottomTextPart2: " NUEVA MAYORÍA",
-            
+           
             // Tamaño calculado: (Radio 340 + mitad de borde 45) * 2 = 770
             canvasSize: 770,
-            pathRadius: 340,  
-            strokeWidth: 90,  
-            fontSize: 60      
+            pathRadius: 340,
+            strokeWidth: 90,
+            fontSize: 60
         };
-
         let userImage = null;
         let frameImage = new Image();
         let stickerImage = new Image();
         let photoState = { x: 0, y: 0, scale: 1 };
-        
-        stickerImage.src = "s.png"; 
-        
-        let stickerState = { 
-            x: config.canvasSize / 2, 
+       
+        stickerImage.src = "s.png";
+       
+        let stickerState = {
+            x: config.canvasSize / 2,
             y: config.canvasSize - 230, // Ajustado levemente por el nuevo tamaño
-            scale: 1.7, 
+            scale: 1.7,
             width: 0,
             height: 0
         };
-
         let isDraggingPhoto = false;
         let startDragX, startDragY;
-
         function createSVGFrame() {
             const size = config.canvasSize;
             const cx = size / 2;
             const cy = size / 2;
             const r = config.pathRadius;
-
             const svgString = `
             <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
                 <defs>
@@ -204,24 +185,23 @@
                     <path id="bottomCurve" d="M ${cx-r},${cy} A ${r},${r} 0 0,0 ${cx+r},${cy}" />
                 </defs>
                 <circle cx="${cx}" cy="${cy}" r="${r}" stroke="${config.mainColor}" stroke-width="${config.strokeWidth}" fill="none" />
-                <text fill="${config.textColor}" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="${config.fontSize}" dy="5">
+                <text fill="${config.textColor}" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="${config.fontSize}" dy="5" letter-spacing="2">
                     <textPath href="#topCurve" startOffset="50%" text-anchor="middle" dominant-baseline="middle">
                         ${config.topText}
                     </textPath>
                 </text>
-                <text font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="${config.fontSize}" dy="5">
+                <text font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="${config.fontSize}" dy="5" letter-spacing="2">
                     <textPath href="#bottomCurve" startOffset="50%" text-anchor="middle" dominant-baseline="middle">
                         <tspan fill="${config.textColor}">${config.bottomTextPart1}</tspan><tspan fill="${config.accentColor}">${config.bottomTextPart2}</tspan>
                     </textPath>
                 </text>
             </svg>`;
-            
+           
             const blob = new Blob([svgString], {type: 'image/svg+xml'});
             const url = URL.createObjectURL(blob);
             frameImage.src = url;
             frameImage.onload = () => draw();
         }
-
         uploadInput.addEventListener('change', (e) => {
             if (e.target.files && e.target.files[0]) {
                 const reader = new FileReader();
@@ -239,31 +219,30 @@
                 reader.readAsDataURL(e.target.files[0]);
             }
         });
-
         stickerImage.onload = () => draw();
-
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Aplicamos un recorte circular global para que la descarga sea redonda
+           
+            // Llenar el fondo completo con blanco para la descarga
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Aplicamos un recorte circular global para que el contenido sea redondo, pero el exterior quede blanco
             ctx.save();
             ctx.beginPath();
             ctx.arc(canvas.width/2, canvas.height/2, canvas.width/2, 0, Math.PI * 2);
             ctx.clip();
-
             // 1. DIBUJAR FOTO USUARIO
             if (userImage) {
                 ctx.save();
                 ctx.beginPath();
-                const innerR = config.pathRadius - (config.strokeWidth / 2) + 2; 
+                const innerR = config.pathRadius - (config.strokeWidth / 2) + 2;
                 ctx.arc(config.canvasSize/2, config.canvasSize/2, innerR, 0, Math.PI * 2);
                 ctx.clip();
-
                 const imgW = userImage.width * photoState.scale;
                 const imgH = userImage.height * photoState.scale;
                 const x = (canvas.width - imgW) / 2 + photoState.x;
                 const y = (canvas.height - imgH) / 2 + photoState.y;
-
                 ctx.drawImage(userImage, x, y, imgW, imgH);
                 ctx.restore();
             } else {
@@ -272,12 +251,10 @@
                 ctx.arc(canvas.width/2, canvas.height/2, 240, 0, Math.PI * 2);
                 ctx.fill();
             }
-
             // 2. DIBUJAR MARCO (SVG)
             if (frameImage.complete) {
                 ctx.drawImage(frameImage, 0, 0, canvas.width, canvas.height);
             }
-
             // 3. DIBUJAR STICKER
             if (stickerImage.complete && stickerImage.width > 0) {
                 const sW = stickerImage.width;
@@ -286,27 +263,23 @@
                 const baseSize = 220 * stickerState.scale;
                 stickerState.width = baseSize;
                 stickerState.height = baseSize / aspect;
-
                 ctx.shadowColor = "#482a83"; // Color morado de la campaña
-                ctx.shadowBlur = 50;         // Cantidad de difuminado
-                ctx.shadowOffsetX = 0;       // Desplazamiento horizontal
-                ctx.shadowOffsetY = 5;       // Desplazamiento vertical (sombra caida)
-
-                ctx.drawImage(stickerImage, 
-                    stickerState.x - (stickerState.width/2), 
-                    stickerState.y - (stickerState.height/2), 
-                    stickerState.width, 
+                ctx.shadowBlur = 50; // Cantidad de difuminado
+                ctx.shadowOffsetX = 0; // Desplazamiento horizontal
+                ctx.shadowOffsetY = 5; // Desplazamiento vertical (sombra caida)
+                ctx.drawImage(stickerImage,
+                    stickerState.x - (stickerState.width/2),
+                    stickerState.y - (stickerState.height/2),
+                    stickerState.width,
                     stickerState.height
                 );
             }
             ctx.restore(); // Finaliza el recorte circular global
         }
-
         photoScaleSlider.addEventListener('input', (e) => {
             photoState.scale = parseFloat(e.target.value);
             draw();
         });
-
         function getPos(e) {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
@@ -315,7 +288,6 @@
             let clientY = e.touches ? e.touches[0].clientY : e.clientY;
             return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
         }
-
         function startDrag(e) {
             const pos = getPos(e);
             if (userImage) {
@@ -324,7 +296,6 @@
                 startDragY = pos.y - photoState.y;
             }
         }
-
         function dragging(e) {
             if (!isDraggingPhoto) return;
             e.preventDefault();
@@ -333,23 +304,19 @@
             photoState.y = pos.y - startDragY;
             draw();
         }
-
         function endDrag() { isDraggingPhoto = false; }
-
         canvas.addEventListener('mousedown', startDrag);
         window.addEventListener('mousemove', dragging);
         window.addEventListener('mouseup', endDrag);
         canvas.addEventListener('touchstart', startDrag, {passive: false});
         window.addEventListener('touchmove', dragging, {passive: false});
         window.addEventListener('touchend', endDrag);
-
         downloadBtn.addEventListener('click', () => {
             const link = document.createElement('a');
             link.download = 'mi_foto_campaña.png';
             link.href = canvas.toDataURL('image/png');
             link.click();
         });
-
         createSVGFrame();
     </script>
 </body>
